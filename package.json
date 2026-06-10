@@ -1,0 +1,17 @@
+{
+  "name": "skill-shed",
+  "version": "0.1.0",
+  "description": "Assorted agent skills.",
+  "license": "CC-BY-4.0",
+  "keywords": [
+    "pi-package",
+    "agent-skills",
+    "skills",
+    "markdown",
+    "preview",
+    "documents"
+  ],
+  "pi": {
+    "skills": ["./skills"]
+  }
+}

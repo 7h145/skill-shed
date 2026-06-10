@@ -1,0 +1,17 @@
+{
+  "name": "markdown-preview-skill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Live preview server for a directory of ordered Markdown files.",
+  "scripts": {
+    "start": "node server/index.js",
+    "check": "node --check server/index.js && node --check server/document.js && node --check server/render.js && node --check server/tex.js"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-footnote": "^4.0.0"
+  }
+}

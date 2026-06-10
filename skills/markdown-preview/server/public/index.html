@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>markdown-preview</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div id="directory" class="directory" title="Markdown directory">Markdown directory</div>
+      <div class="status">
+        <span id="connection" class="pill muted" title="Connection status to the preview server">connecting</span>
+        <button id="updated" class="timestamp timestamp-button" type="button" title="Time of last rebuild, click to rebuild now">not updated yet</button>
+      </div>
+      <div class="menu-wrap">
+        <button id="menu-button" class="icon-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open menu">☰</button>
+        <nav id="menu" class="menu" hidden>
+          <a class="menu-item" href="/api/render/markdown" target="_blank" rel="noreferrer">Raw Markdown</a>
+          <a class="menu-item" href="/api/render/tex" target="_blank" rel="noreferrer">Raw TeX</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="content">
+      <pre id="error" class="error" hidden></pre>
+      <article id="document" class="document"></article>
+    </main>
+
+    <script src="/client.js" type="module"></script>
+  </body>
+</html>
