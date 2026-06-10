@@ -61,6 +61,24 @@ Then open:
 http://127.0.0.1:4177
 ```
 
+## User handoff
+
+After starting or restarting the preview server, always report the browser URL directly and ask the user to open it.
+
+Example:
+
+```text
+Markdown preview is running for `markdown/`.
+
+Open this URL in your browser:
+
+http://127.0.0.1:4177
+
+Process: tmux window `markdown-preview`
+```
+
+If `boxed-dbus open-uri` is already available and verified in a boxed/containerized environment, you may offer or use it for a clickable host-side open action. If it is not available, do not bootstrap DBus just for this; print the URL and ask the user to open it manually.
+
 ## Run as a background process
 
 Use an inspectable background process. Name the process/window `markdown-preview` when possible.
