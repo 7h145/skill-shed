@@ -25,7 +25,14 @@ Pi example: install from GitHub as a Pi package:
 pi install git:github.com/7h145/skill-shed
 ```
 
-Or copy the skill directories into wherever your agent harness loads skills from.
+Or install with [npm skills](https://www.npmjs.com/package/skills):
+
+```bash
+npx skills add 7h145/skill-shed
+```
+
+Or just copy the skill directories into wherever your agent harness loads
+skills from.
 
 ## Usage
 

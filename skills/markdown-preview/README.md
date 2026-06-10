@@ -38,3 +38,20 @@ Files are ordered lexicographically by filename. Use names such as:
 - The agent handles dependency setup and server startup.
 - Runtime artifacts should stay outside the Markdown source directory.
 - See `SKILL.md` for agent instructions and operational details.
+
+## Install
+
+Install this skill through your agent harness, or copy this skill directory into
+wherever your harness loads skills from.
+
+Pi example:
+
+```bash
+pi install git:github.com/7h145/skill-shed
+```
+
+[npm skills](https://www.npmjs.com/package/skills) example:
+
+```bash
+npx skills add 7h145/skill-shed
+```
