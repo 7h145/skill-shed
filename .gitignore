@@ -1,0 +1,5 @@
+# gitignore(5)
+
+.agents/
+node_modules/
+
