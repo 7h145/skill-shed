@@ -1,8 +1,18 @@
 {
   "name": "skill-shed",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Assorted agent skills.",
   "license": "CC-BY-4.0",
+  "workspaces": [
+    "skills/*"
+  ],
+  "scripts": {
+    "check": "npm run check --workspace markdown-preview-skill",
+    "test": "npm test --workspace markdown-preview-skill"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "keywords": [
     "pi-package",
     "agent-skills",

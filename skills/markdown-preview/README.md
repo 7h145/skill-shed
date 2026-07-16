@@ -1,6 +1,6 @@
 # markdown-preview
 
-Live browser preview for a directory of ordered Markdown files.
+Live browser preview for an ordered tree of Markdown files.
 
 `markdown-preview` treats the `*.md` and `*.markdown` leaves in a directory tree as one document. Files and directories are traversed in deterministic natural filename order, Markdown leaves are concatenated depth-first, and the result is rendered through a local web UI.
 
@@ -18,7 +18,7 @@ The agent should start the local preview server and give you a URL to open in yo
 
 - Ordered, arbitrarily nested multi-file Markdown preview.
 - Recursive live browser updates using native filesystem events or polling.
-- Manual refresh action.
+- Clickable rebuild timestamp for manual refreshes.
 - Raw concatenated Markdown view.
 - Optional raw TeX view when Pandoc is available.
 - Localhost-first behavior by default.
@@ -48,7 +48,8 @@ Entries name immediate root files or directories. Listed entries come first in t
 Native filesystem events are used by default. For container mounts, network filesystems, or other environments where events are unreliable, enable polling:
 
 ```bash
-node server/index.js --dir markdown --watch-mode poll --poll-interval 500
+SKILL_DIR=/path/to/this/skill
+node "$SKILL_DIR/server/index.js" --dir markdown --watch-mode poll --poll-interval 500
 ```
 
 Polling is recursive but costs more filesystem I/O, so it is opt-in. The polling interval defaults to 500 milliseconds.
@@ -76,4 +77,14 @@ pi install git:github.com/7h145/skill-shed
 
 ```bash
 npx skills add 7h145/skill-shed
+```
+
+## Development
+
+From the `skill-shed` repository root:
+
+```bash
+npm install
+npm run check
+npm test
 ```

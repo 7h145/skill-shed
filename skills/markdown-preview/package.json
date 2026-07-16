@@ -3,7 +3,10 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Live preview server for a directory of ordered Markdown files.",
+  "description": "Live preview server for an ordered tree of Markdown files.",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server/index.js",
     "check": "node --check server/index.js && node --check server/document.js && node --check server/render.js && node --check server/tex.js && node --check server/watch.js",

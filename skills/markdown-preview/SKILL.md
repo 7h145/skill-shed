@@ -1,6 +1,7 @@
 ---
 name: markdown-preview
 description: Preview an ordered tree of Markdown files as one browser-rendered document. Use when a user wants a reactive web preview of a nested multi-file Markdown document.
+license: CC-BY-4.0
 ---
 
 # markdown-preview

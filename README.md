@@ -8,9 +8,9 @@ relevant.
 
 ## Included skills
 
-- [`markdown-preview`](./skills/markdown-preview/) — preview a directory of
-  ordered Markdown files as one live browser-rendered document, with live
-  updates and optional raw TeX output through Pandoc.
+- [`markdown-preview`](./skills/markdown-preview/) — preview an ordered tree of
+  Markdown files as one live browser-rendered document, with recursive updates
+  and optional raw TeX output through Pandoc.
 
 ## Install
 
@@ -48,3 +48,14 @@ explicitly:
 ```
 
 See each skill directory for detailed instructions and examples.
+
+## Development
+
+Install all skill dependencies from the repository root, then run the checks
+and tests:
+
+```bash
+npm install
+npm run check
+npm test
+```
