@@ -11,7 +11,7 @@ The user provides a directory such as `markdown/`. The skill recursively reads M
 
 ## Agent runtime environment
 
-If you are running in a boxed/containerized agent environment, use the relevant `boxed-*` skills for host/container-safe workflows. The boxed skills live at <https://github.com/7h145/boxed-skills>. For this long-running preview server, prefer `boxed-tmux` so the process is visible, inspectable, and easy to stop.
+If you are running in a boxed/containerized agent environment, use the relevant `boxed-*` skills for host/container-safe workflows. The boxed skills live at <https://github.com/7h145/boxed-skills>. For this long-running preview server, prefer `boxed-tmux` so the process is visible, inspectable, and easy to stop. When the Markdown directory is on a host/container mount, prefer `--watch-mode poll` for reliable recursive updates.
 
 If you are not running boxed/containerized, use ordinary `tmux`, your harness's background-process mechanism, or another appropriate inspectable process manager.
 
@@ -51,9 +51,11 @@ node "$SKILL_DIR/server/index.js" --dir markdown --host 127.0.0.1 --port 4177
 Options:
 
 ```text
---dir <path>     Markdown directory to preview. Required.
---host <host>    Bind host. Default: 127.0.0.1. Always use 127.0.0.1 unless the user explicitly requests a different bind host.
---port <port>    Bind port. Default: 4177.
+--dir <path>             Markdown directory to preview. Required.
+--host <host>            Bind host. Default: 127.0.0.1. Always use 127.0.0.1 unless the user explicitly requests a different bind host.
+--port <port>            Bind port. Default: 4177.
+--watch-mode <mode>      Watch mode: events or poll. Default: events.
+--poll-interval <ms>     Polling interval. Default: 500; requires poll mode.
 ```
 
 Then open:
@@ -91,7 +93,7 @@ If the `boxed-tmux` skill is available and you are boxed/containerized, load it 
 ```bash
 SKILL_DIR=/path/to/this/skill
 WINDOW=markdown-preview
-COMMAND="node \"$SKILL_DIR/server/index.js\" --dir markdown --host 127.0.0.1 --port 4177"
+COMMAND="node \"$SKILL_DIR/server/index.js\" --dir markdown --host 127.0.0.1 --port 4177 --watch-mode poll"
 ```
 
 Always bind to `127.0.0.1` unless the user explicitly requests a different bind host.
@@ -119,6 +121,8 @@ Listed entries come first; unlisted entries follow in natural order. The server 
 
 ## Runtime behavior
 
+The watcher recursively observes Markdown leaves and the root `.markdown-preview.json` without following symlinks. Native filesystem events are the default. Polling is opt-in for mounted/network filesystems and defaults to a 500 ms interval. Rapid changes are debounced, and rebuilds are serialized and coalesced.
+
 The server provides:
 
 - `GET /` — browser UI.
@@ -133,14 +137,15 @@ Runtime artifacts should stay outside the Markdown source directory. Prefer `.ag
 
 ## Troubleshooting
 
-- If the page loads but does not update, check the server logs in the tmux/background-process window. Until recursive watcher support is added, click the rebuild timestamp after edits below the Markdown root level.
+- If the page loads but does not update, check the server logs in the tmux/background-process window. On container mounts or network filesystems, restart with `--watch-mode poll`; adjust with `--poll-interval <ms>` if needed.
 - If images do not load, use paths relative to the Markdown directory or place assets below that directory.
 - If the server is unreachable, keep `127.0.0.1` as the default and ask the user before binding to a different host or changing exposure/forwarding.
 - If Node dependencies are missing, set `SKILL_DIR=/path/to/this/skill` and run `cd "$SKILL_DIR" && npm install`.
 - If `/api/render/tex` reports `pandoc_missing`, ask the user before installing Pandoc. Pandoc is optional and only needed for raw TeX rendering. The error includes an `agentPrompt` field the user can copy/paste back to an agent.
 
 ## Metadata
-* Author: thias <github.attic@typedef.net>, OpenAI gpt-5.5
+* Author: thias <github.attic@typedef.net>, OpenAI Codex (5.5, 5.6)
 * License: CC BY 4.0
-* Version: 0.1
-* Date: 2026-06-09
+* Version: 0.2
+* Date: 2026-07-16
+* Last verified with Pi: 0.80.6

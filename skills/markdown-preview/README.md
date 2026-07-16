@@ -17,7 +17,7 @@ The agent should start the local preview server and give you a URL to open in yo
 ## Features
 
 - Ordered, arbitrarily nested multi-file Markdown preview.
-- Live browser updates when watched files change.
+- Recursive live browser updates using native filesystem events or polling.
 - Manual refresh action.
 - Raw concatenated Markdown view.
 - Optional raw TeX view when Pandoc is available.
@@ -43,12 +43,22 @@ For an explicit root order, add `.markdown-preview.json` to the Markdown directo
 
 Entries name immediate root files or directories. Listed entries come first in the given order; unlisted entries follow in natural order. Unknown or duplicate entries are reported as configuration errors.
 
+## File watching
+
+Native filesystem events are used by default. For container mounts, network filesystems, or other environments where events are unreliable, enable polling:
+
+```bash
+node server/index.js --dir markdown --watch-mode poll --poll-interval 500
+```
+
+Polling is recursive but costs more filesystem I/O, so it is opt-in. The polling interval defaults to 500 milliseconds.
+
 ## Notes
 
 - The agent handles dependency setup and server startup.
 - Runtime artifacts should stay outside the Markdown source directory.
 - Relative images and asset links in nested Markdown files resolve from the source file's directory.
-- Until recursive watcher support lands, use the clickable rebuild timestamp after changing a nested file that does not trigger an automatic update.
+- The watcher does not follow symlinks outside the document tree.
 - See `SKILL.md` for agent instructions and operational details.
 
 ## Install

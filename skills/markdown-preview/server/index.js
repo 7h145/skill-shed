@@ -4,29 +4,59 @@ import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import chokidar from 'chokidar';
 import { buildDocument, resolveMarkdownDirectory, safeSourcePath } from './document.js';
 import { renderMarkdown } from './render.js';
 import { hasPandoc, renderMarkdownToTex } from './tex.js';
+import { createRebuildQueue, watchMarkdownDir } from './watch.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, 'public');
 
 function parseArgs(argv) {
-  const options = { host: '127.0.0.1', port: 4177 };
+  const options = {
+    host: '127.0.0.1',
+    port: 4177,
+    watchMode: 'events',
+    pollInterval: 500,
+    pollIntervalSet: false,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--dir') options.dir = argv[++i];
     else if (arg === '--host') options.host = argv[++i];
     else if (arg === '--port') options.port = Number(argv[++i]);
-    else if (arg === '--help' || arg === '-h') options.help = true;
+    else if (arg === '--watch-mode') options.watchMode = argv[++i];
+    else if (arg === '--poll-interval') {
+      options.pollInterval = Number(argv[++i]);
+      options.pollIntervalSet = true;
+    } else if (arg === '--help' || arg === '-h') options.help = true;
     else throw new Error(`Unknown option: ${arg}`);
+  }
+
+  if (!['events', 'poll'].includes(options.watchMode)) {
+    throw new Error('--watch-mode must be either "events" or "poll".');
+  }
+  if (!Number.isInteger(options.pollInterval) || options.pollInterval < 50) {
+    throw new Error('--poll-interval must be an integer of at least 50 milliseconds.');
+  }
+  if (options.pollIntervalSet && options.watchMode !== 'poll') {
+    throw new Error('--poll-interval may only be used with --watch-mode poll.');
   }
   return options;
 }
 
 function printHelp() {
-  console.log(`markdown-preview\n\nUsage:\n  node server/index.js --dir <markdown-dir> [--host 127.0.0.1] [--port 4177]\n`);
+  console.log(`markdown-preview
+
+Usage:
+  node server/index.js --dir <markdown-dir> [options]
+
+Options:
+  --host <host>            Bind host. Default: 127.0.0.1.
+  --port <port>            Bind port. Default: 4177.
+  --watch-mode <mode>      Watch mode: events or poll. Default: events.
+  --poll-interval <ms>     Polling interval in milliseconds. Default: 500; requires poll mode.
+`);
 }
 
 function sendJson(res, status, data) {
@@ -101,7 +131,10 @@ async function createState(markdownDir) {
     }
   };
 
-  await state.rebuild('initial');
+  state.requestRebuild = createRebuildQueue(state.rebuild);
+  state.broadcastError = (reason) => broadcast(state, 'error', publicPayload(state, reason));
+
+  await state.requestRebuild('initial');
   return state;
 }
 
@@ -161,7 +194,7 @@ function createServer(state) {
           });
         }
       } else if (url.pathname === '/api/render/rebuild' && req.method === 'POST') {
-        await state.rebuild('manual-refresh');
+        await state.requestRebuild('manual-refresh');
         sendJson(res, 200, publicPayload(state, 'manual-refresh'));
       } else if (url.pathname === '/api/events') {
         res.writeHead(200, {
@@ -184,32 +217,6 @@ function createServer(state) {
   });
 }
 
-function watchMarkdownDir(state) {
-  let timer = null;
-  const isMarkdownFile = (file) => /\.(?:md|markdown)$/i.test(file) && !file.includes(path.sep);
-  const watcher = chokidar.watch(state.markdownDir, {
-    ignoreInitial: true,
-    depth: 0,
-  });
-
-  const schedule = (event, file) => {
-    const relativeFile = path.relative(state.markdownDir, path.resolve(state.markdownDir, file));
-    if (!isMarkdownFile(relativeFile)) return;
-    clearTimeout(timer);
-    timer = setTimeout(() => state.rebuild(`${event}:${relativeFile}`), 100);
-  };
-
-  watcher.on('add', (file) => schedule('add', file));
-  watcher.on('change', (file) => schedule('change', file));
-  watcher.on('unlink', (file) => schedule('unlink', file));
-  watcher.on('error', (error) => {
-    state.error = String(error?.stack || error);
-    broadcast(state, 'error', publicPayload(state, 'watch-error'));
-  });
-
-  return watcher;
-}
-
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -219,11 +226,15 @@ async function main() {
 
   const markdownDir = await resolveMarkdownDirectory(options.dir);
   const state = await createState(markdownDir);
-  watchMarkdownDir(state);
+  watchMarkdownDir(state, options);
 
   const server = createServer(state);
   server.listen(options.port, options.host, () => {
+    const watcherDescription = options.watchMode === 'poll'
+      ? `poll (${options.pollInterval} ms)`
+      : 'events';
     console.log(`[markdown-preview] directory: ${markdownDir}`);
+    console.log(`[markdown-preview] watcher: ${watcherDescription}`);
     console.log(`[markdown-preview] listening: http://${options.host}:${options.port}`);
   });
 }

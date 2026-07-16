@@ -1,12 +1,12 @@
 {
   "name": "markdown-preview-skill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Live preview server for a directory of ordered Markdown files.",
   "scripts": {
     "start": "node server/index.js",
-    "check": "node --check server/index.js && node --check server/document.js && node --check server/render.js && node --check server/tex.js",
+    "check": "node --check server/index.js && node --check server/document.js && node --check server/render.js && node --check server/tex.js && node --check server/watch.js",
     "test": "node --test"
   },
   "dependencies": {
