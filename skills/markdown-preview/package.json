@@ -6,7 +6,8 @@
   "description": "Live preview server for a directory of ordered Markdown files.",
   "scripts": {
     "start": "node server/index.js",
-    "check": "node --check server/index.js && node --check server/document.js && node --check server/render.js && node --check server/tex.js"
+    "check": "node --check server/index.js && node --check server/document.js && node --check server/render.js && node --check server/tex.js",
+    "test": "node --test"
   },
   "dependencies": {
     "chokidar": "^4.0.3",

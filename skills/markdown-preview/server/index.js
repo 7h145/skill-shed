@@ -88,7 +88,7 @@ async function createState(markdownDir) {
   state.rebuild = async function rebuild(reason = 'manual') {
     try {
       const document = await buildDocument(markdownDir);
-      const html = await renderMarkdown(document.markdown);
+      const html = renderMarkdown(document.markdown, { sources: document.sources });
       state.document = document;
       state.html = html;
       state.error = null;

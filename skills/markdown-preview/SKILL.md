@@ -1,13 +1,13 @@
 ---
 name: markdown-preview
-description: Preview a directory of ordered Markdown files as one live, browser-rendered document. Use when a user wants a reactive web preview of a multi-file Markdown document.
+description: Preview an ordered tree of Markdown files as one browser-rendered document. Use when a user wants a reactive web preview of a nested multi-file Markdown document.
 ---
 
 # markdown-preview
 
 Preview a multi-file Markdown document in a browser.
 
-The user provides a directory such as `markdown/`. The skill reads Markdown files from that directory, sorts them lexicographically by filename, concatenates them into one virtual document, renders the document to HTML, and serves it through a local web server with live updates when files change.
+The user provides a directory such as `markdown/`. The skill recursively reads Markdown leaves from that directory tree, traverses files and directories in natural filename order, concatenates the leaves depth-first into one virtual document, renders the document to HTML, and serves it through a local web server.
 
 ## Agent runtime environment
 
@@ -20,9 +20,10 @@ If you are not running boxed/containerized, use ordinary `tmux`, your harness's 
 Do this first:
 
 - Accept a Markdown directory from the user.
-- Discover `*.md` and `*.markdown` files in that directory.
-- Sort files lexicographically by filename.
-- Concatenate them into one virtual document.
+- Discover `*.md` and `*.markdown` leaves recursively without following symlinks.
+- Traverse each directory depth-first in deterministic natural filename order.
+- Allow an optional root-level `.markdown-preview.json` `order` array to override root entry order.
+- Concatenate the leaves into one virtual document while retaining their source paths.
 - Render to HTML, including footnotes and heading anchors.
 - Serve a live web preview.
 - Watch files and update the browser reactively.
@@ -104,6 +105,18 @@ SKILL_DIR=/path/to/this/skill
 tmux new-session -d -s markdown-preview "node \"$SKILL_DIR/server/index.js\" --dir markdown --host 127.0.0.1 --port 4177"
 ```
 
+## Document ordering
+
+By default, files and directories are ordered naturally among their siblings, so `2-chapter` precedes `10-appendix`. An optional `.markdown-preview.json` in the Markdown root may list immediate root entry names explicitly:
+
+```json
+{
+  "order": ["0-title.md", "1-abstract", "2-introduction", "10-appendix"]
+}
+```
+
+Listed entries come first; unlisted entries follow in natural order. The server reports unknown and duplicate entries as configuration errors. Relative images and non-Markdown asset links are resolved from the directory of the Markdown leaf containing them.
+
 ## Runtime behavior
 
 The server provides:
@@ -120,7 +133,7 @@ Runtime artifacts should stay outside the Markdown source directory. Prefer `.ag
 
 ## Troubleshooting
 
-- If the page loads but does not update, check the server logs in the tmux/background-process window.
+- If the page loads but does not update, check the server logs in the tmux/background-process window. Until recursive watcher support is added, click the rebuild timestamp after edits below the Markdown root level.
 - If images do not load, use paths relative to the Markdown directory or place assets below that directory.
 - If the server is unreachable, keep `127.0.0.1` as the default and ask the user before binding to a different host or changing exposure/forwarding.
 - If Node dependencies are missing, set `SKILL_DIR=/path/to/this/skill` and run `cd "$SKILL_DIR" && npm install`.

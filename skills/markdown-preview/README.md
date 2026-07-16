@@ -2,7 +2,7 @@
 
 Live browser preview for a directory of ordered Markdown files.
 
-`markdown-preview` treats all top-level `*.md` and `*.markdown` files in a directory as one document. Files are sorted lexicographically by filename, concatenated, rendered to HTML, and served through a local web UI that updates when files change.
+`markdown-preview` treats the `*.md` and `*.markdown` leaves in a directory tree as one document. Files and directories are traversed in deterministic natural filename order, Markdown leaves are concatenated depth-first, and the result is rendered through a local web UI.
 
 ## Usage
 
@@ -16,8 +16,8 @@ The agent should start the local preview server and give you a URL to open in yo
 
 ## Features
 
-- Ordered multi-file Markdown preview.
-- Live browser updates when files change.
+- Ordered, arbitrarily nested multi-file Markdown preview.
+- Live browser updates when watched files change.
 - Manual refresh action.
 - Raw concatenated Markdown view.
 - Optional raw TeX view when Pandoc is available.
@@ -25,18 +25,30 @@ The agent should start the local preview server and give you a URL to open in yo
 
 ## File ordering
 
-Files are ordered lexicographically by filename. Use names such as:
+Each directory is traversed depth-first. Its immediate Markdown files and subdirectories are ordered naturally by name, so `2-chapter` precedes `10-appendix` and `3.2-section.md` precedes `3.10-section.md`.
 
-```text
-001-intro.md
-002-background.md
-010-results.md
+For an explicit root order, add `.markdown-preview.json` to the Markdown directory:
+
+```json
+{
+  "order": [
+    "0-title.md",
+    "1-abstract",
+    "abbreviations",
+    "2-introduction",
+    "10-appendix"
+  ]
+}
 ```
+
+Entries name immediate root files or directories. Listed entries come first in the given order; unlisted entries follow in natural order. Unknown or duplicate entries are reported as configuration errors.
 
 ## Notes
 
 - The agent handles dependency setup and server startup.
 - Runtime artifacts should stay outside the Markdown source directory.
+- Relative images and asset links in nested Markdown files resolve from the source file's directory.
+- Until recursive watcher support lands, use the clickable rebuild timestamp after changing a nested file that does not trigger an automatic update.
 - See `SKILL.md` for agent instructions and operational details.
 
 ## Install
