@@ -4,7 +4,54 @@ const connectionEl = document.querySelector('#connection');
 const updatedEl = document.querySelector('#updated');
 const menuButtonEl = document.querySelector('#menu-button');
 const menuEl = document.querySelector('#menu');
+const printButtonEl = document.querySelector('#print-button');
 const directoryEl = document.querySelector('#directory');
+const printPageStyleEl = document.createElement('style');
+printPageStyleEl.id = 'print-page-style';
+document.head.append(printPageStyleEl);
+
+function formatPrintTimestamp(date = new Date()) {
+  try {
+    const formattedDate = new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'short',
+    }).format(date);
+    const formattedTime = new Intl.DateTimeFormat(undefined, {
+      timeStyle: 'medium',
+    }).format(date);
+    return `${formattedDate} ${formattedTime}`;
+  } catch {
+    return date.toISOString().replace('T', ' ').replace('Z', ' UTC');
+  }
+}
+
+function updatePrintPageStyle() {
+  const footer = `markdown-preview, ${formatPrintTimestamp()}`;
+  printPageStyleEl.textContent = `
+    @page {
+      margin: 18mm 16mm;
+
+      @top-left-corner { content: none; }
+      @top-left { content: none; }
+      @top-center { content: none; }
+      @top-right { content: none; }
+      @top-right-corner { content: none; }
+
+      @bottom-left {
+        content: ${JSON.stringify(footer)};
+        color: #777777;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 8pt;
+      }
+
+      @bottom-right {
+        content: counter(page) " of " counter(pages);
+        color: #555555;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 8pt;
+      }
+    }
+  `;
+}
 
 function setConnection(state) {
   connectionEl.textContent = state;
@@ -28,6 +75,13 @@ function setMenu(open) {
 }
 
 menuButtonEl.addEventListener('click', () => setMenu(menuEl.hidden));
+printButtonEl.addEventListener('click', () => {
+  setMenu(false);
+  updatePrintPageStyle();
+  window.print();
+});
+window.addEventListener('beforeprint', updatePrintPageStyle);
+updatePrintPageStyle();
 document.addEventListener('click', (event) => {
   if (!menuEl.hidden && !event.target.closest('.menu-wrap')) setMenu(false);
 });

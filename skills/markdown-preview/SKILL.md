@@ -16,9 +16,7 @@ If you are running in a boxed/containerized agent environment, use the relevant 
 
 If you are not running boxed/containerized, use ordinary `tmux`, your harness's background-process mechanism, or another appropriate inspectable process manager.
 
-## First implementation scope
-
-Do this first:
+## Core behavior
 
 - Accept a Markdown directory from the user.
 - Discover `*.md` and `*.markdown` leaves recursively without following symlinks.
@@ -124,6 +122,8 @@ Listed entries come first; unlisted entries follow in natural order. The server 
 
 The watcher recursively observes Markdown leaves and the root `.markdown-preview.json` without following symlinks. Native filesystem events are the default. Polling is opt-in for mounted/network filesystems and defaults to a 500 ms interval. Rapid changes are debounced, and rebuilds are serialized and coalesced.
 
+The browser menu includes `Print / Save as PDF`, which opens the browser print dialog. The print stylesheet hides the preview UI and improves typography, margins, and page breaks in all browsers. Modern Chromium also supports the CSS page-margin boxes used to omit a CSS-generated header and add a localized `markdown-preview, <date> <time>` footer on the left plus `x of y` page numbering on the right. The timestamp uses the browser locale with ISO 8601 as a fallback. Firefox currently ignores these margin boxes and falls back to its native print headers/page numbering. Browser-supplied headers and footers are outside page control and may need to be disabled in the print dialog. This feature is intended for quick printable snapshots; publication-quality PDF/TeX builds remain project-specific.
+
 The server provides:
 
 - `GET /` — browser UI.
@@ -140,6 +140,7 @@ Runtime artifacts should stay outside the Markdown source directory. Prefer `.ag
 
 - If the page loads but does not update, check the server logs in the tmux/background-process window. On container mounts or network filesystems, restart with `--watch-mode poll`; adjust with `--poll-interval <ms>` if needed.
 - If images do not load, use paths relative to the Markdown directory or place assets below that directory.
+- If the custom print footer is missing, use a modern Chromium browser. Firefox currently ignores CSS page-margin boxes; its native print header/footer settings remain available.
 - If the server is unreachable, keep `127.0.0.1` as the default and ask the user before binding to a different host or changing exposure/forwarding.
 - If Node dependencies are missing, set `SKILL_DIR=/path/to/this/skill` and run `cd "$SKILL_DIR" && npm install`.
 - If `/api/render/tex` reports `pandoc_missing`, ask the user before installing Pandoc. Pandoc is optional and only needed for raw TeX rendering. The error includes an `agentPrompt` field the user can copy/paste back to an agent.
@@ -147,6 +148,6 @@ Runtime artifacts should stay outside the Markdown source directory. Prefer `.ag
 ## Metadata
 * Author: thias <github.attic@typedef.net>, OpenAI Codex (5.5, 5.6)
 * License: CC BY 4.0
-* Version: 0.2
+* Version: 0.3
 * Date: 2026-07-16
 * Last verified with Pi: 0.80.6

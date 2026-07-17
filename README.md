@@ -9,8 +9,8 @@ relevant.
 ## Included skills
 
 - [`markdown-preview`](./skills/markdown-preview/) — preview an ordered tree of
-  Markdown files as one live browser-rendered document, with recursive updates
-  and optional raw TeX output through Pandoc.
+  Markdown files as one live browser-rendered document, with recursive updates,
+  print-friendly output, and optional raw TeX output through Pandoc.
 
 ## Install
 
